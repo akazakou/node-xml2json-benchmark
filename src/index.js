@@ -30,17 +30,15 @@ if (cluster.isMaster) {
     });
 } else {
     const fs = require('fs');
-    const xmlParser = require('fast-xml-parser');
+    const { toJson } = require('camaro');
 
     const xmlRawPayload = fs.readFileSync(`${__dirname}/../payload.xml`).toString('utf8');
-    const options = {
-        attrNodeName: 'attr',
-        ignoreAttributes : false,
-    };
 
-    for (let i = 0; i < iterationCount; i++) {
-        xmlParser.parse(xmlRawPayload, options);
-    }
+    ;(async () => {
+        for (let i = 0; i < iterationCount; i++) {
+            await toJson(xmlRawPayload);
+        }
 
-    process.exit(0);
+        process.exit(0);
+    })();
 }
