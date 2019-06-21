@@ -20,6 +20,5 @@ FROM base AS release
 COPY --from=dependencies /home/node/app/node_modules ./node_modules
 COPY --from=dependencies /home/node/app/payload.xml.sample ./payload.xml
 COPY . /home/node/app/
-COPY ./*.xml* /home/node/app/*
 
 ENTRYPOINT ["node", "/home/node/app/src/index.js"]
