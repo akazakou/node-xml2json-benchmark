@@ -10,10 +10,9 @@ console.info(`Starting ${threadCount} threads for test...`);
 
 let workersCount = 0;
 for (let i = 0; i < threadCount; i++) {
-    workersCount++;
-
-    (new Worker(`${__dirname}/thread.js`)).on('exit', () => {
+    (() => (new Worker(`${__dirname}/thread.js`)).on('online', () => workersCount++).on('exit', () => {
         workersCount--;
+
         if (workersCount <= 0) {
             const endTime = new Date();
 
@@ -22,7 +21,7 @@ for (let i = 0; i < threadCount; i++) {
 
             process.exit(0);
         }
-    })
+    }))();
 }
 
 console.info('Waiting for all threads to finish...');
