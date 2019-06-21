@@ -1,23 +1,18 @@
-const cluster = require('cluster');
-
 const iterationCount = Number(process.env.ITERATION_COUNT);
 const threadCount = Number(process.env.THREAD_COUNT);
+const { Worker } = require('worker_threads');
 
-if (cluster.isMaster) {
-    const startTime = new Date();
+const startTime = new Date();
 
-    console.info(`Started at ${startTime.toISOString()}`);
-    console.info(`Each thread will run ${iterationCount} iterations for test...`);
-    console.info(`Starting ${threadCount} threads for test...`);
+console.info(`Started at ${startTime.toISOString()}`);
+console.info(`Each thread will run ${iterationCount} iterations for test...`);
+console.info(`Starting ${threadCount} threads for test...`);
 
-    let workersCount = 0;
-    for (let i = 0; i < threadCount; i++) {
-        workersCount++;
-        cluster.fork();
-    }
+let workersCount = 0;
+for (let i = 0; i < threadCount; i++) {
+    workersCount++;
 
-    console.info('Waiting for all threads to finish...');
-    cluster.on('exit', (worker, code, signal) => {
+    (new Worker(`${__dirname}/thread.js`)).on('exit', () => {
         workersCount--;
         if (workersCount <= 0) {
             const endTime = new Date();
@@ -27,18 +22,7 @@ if (cluster.isMaster) {
 
             process.exit(0);
         }
-    });
-} else {
-    const fs = require('fs');
-    const { toJson } = require('camaro');
-
-    const xmlRawPayload = fs.readFileSync(`${__dirname}/../payload.xml`).toString('utf8');
-
-    ;(async () => {
-        for (let i = 0; i < iterationCount; i++) {
-            await toJson(xmlRawPayload);
-        }
-
-        process.exit(0);
-    })();
+    })
 }
+
+console.info('Waiting for all threads to finish...');
