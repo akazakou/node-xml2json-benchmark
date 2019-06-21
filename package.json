@@ -10,7 +10,6 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "camaro": "^4.0.4",
-    "fast-xml-parser": "^3.12.16"
+    "camaro": "^4.0.4"
   }
 }
