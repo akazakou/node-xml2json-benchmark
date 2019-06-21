@@ -1,4 +1,5 @@
 const cluster = require('cluster');
+const { EventEmitter } = require('events');
 
 const iterationCount = Number(process.env.ITERATION_COUNT);
 const threadCount = Number(process.env.THREAD_COUNT);
@@ -30,15 +31,24 @@ if (cluster.isMaster) {
     });
 } else {
     const fs = require('fs');
-    const { toJson } = require('camaro');
+    const fast = require('fast-xml-parser');
 
     const xmlRawPayload = fs.readFileSync(`${__dirname}/../payload.xml`).toString('utf8');
+    const emitter = new EventEmitter();
 
-    ;(async () => {
-        for (let i = 0; i < iterationCount; i++) {
-            await toJson(xmlRawPayload);
+    let counter = 0;
+    emitter.on('done', () => {
+        ++counter
+
+        if (counter >= iterationCount) {
+            process.exit(0);
         }
+    });
 
-        process.exit(0);
-    })();
+    for (let i = 0; i < iterationCount; i++) {
+        (() => {
+            fast.parse(xmlRawPayload);
+            emitter.emit('done');
+        })();
+    }
 }
